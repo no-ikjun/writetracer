@@ -1,26 +1,390 @@
 @import "tailwindcss";
 
+/* stylelint-disable */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --foreground: #37352f;
+  --sidebar-bg: #f7f6f3;
+  --sidebar-hover: #ebebea;
+  --border-color: #e9e9e7;
+  --accent-color: #2383e2;
+  --text-muted: #9b9a97;
+  --code-bg: #f7f6f3;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #191919;
+    --foreground: #e6e6e5;
+    --sidebar-bg: #1f1f1f;
+    --sidebar-hover: #2f2f2f;
+    --border-color: #373737;
+    --accent-color: #5c9fe7;
+    --text-muted: #7a7a7a;
+    --code-bg: #2f2f2f;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* TipTap 에디터 스타일 */
+.tiptap {
+  @apply outline-none min-h-[500px] text-(--foreground);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.tiptap p {
+  @apply mb-4 leading-relaxed;
+  font-size: 16px;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3 {
+  @apply font-semibold leading-tight tracking-tight;
+}
+
+.tiptap h1 {
+  @apply text-4xl mt-8 mb-4 font-bold;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.tiptap h2 {
+  @apply text-2xl mt-8 mb-3 font-semibold;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.tiptap h3 {
+  @apply text-xl mt-6 mb-2 font-semibold;
+  line-height: 1.4;
+}
+
+.tiptap strong {
+  @apply font-semibold;
+}
+
+.tiptap em {
+  @apply italic;
+}
+
+.tiptap s {
+  @apply line-through text-(--text-muted);
+}
+
+.tiptap code {
+  @apply font-mono text-sm bg-red-50 text-red-500 px-1.5 py-0.5 rounded;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tiptap code {
+    @apply bg-red-950 text-red-400;
+  }
+}
+
+.tiptap ul,
+.tiptap ol {
+  @apply pl-6 my-2;
+}
+
+.tiptap li {
+  @apply my-1;
+}
+
+.tiptap li p {
+  @apply m-0;
+}
+
+.tiptap ul {
+  @apply list-disc;
+}
+
+.tiptap ol {
+  @apply list-decimal;
+}
+
+.tiptap blockquote {
+  @apply border-l-4 border-(--border-color) my-6 py-2 pl-6 italic;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.tiptap blockquote p {
+  @apply m-0;
+}
+
+.tiptap pre {
+  @apply bg-(--code-bg) rounded-md p-4 my-4 overflow-x-auto font-mono text-sm leading-relaxed;
+}
+
+.tiptap pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+.tiptap hr {
+  @apply border-none border-t border-(--border-color) my-8;
+}
+
+.tiptap u {
+  @apply underline;
+}
+
+.tiptap mark {
+  @apply bg-yellow-200 dark:bg-yellow-900 px-1 rounded;
+}
+
+.tiptap [style*="text-align: left"] {
+  @apply text-left;
+}
+
+.tiptap [style*="text-align: center"] {
+  @apply text-center;
+}
+
+.tiptap [style*="text-align: right"] {
+  @apply text-right;
+}
+
+.tiptap [style*="text-align: justify"] {
+  @apply text-justify;
+}
+
+.tiptap ul[data-type="taskList"] {
+  @apply list-none pl-0 my-2;
+}
+
+.tiptap ul[data-type="taskList"] li {
+  @apply flex items-start gap-2 my-1;
+}
+
+.tiptap ul[data-type="taskList"] li > label {
+  @apply flex items-center cursor-pointer mt-0.5;
+}
+
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"] {
+  @apply w-4 h-4 cursor-pointer accent-(--accent-color);
+}
+
+.tiptap ul[data-type="taskList"] li[data-checked="true"] > div {
+  @apply line-through text-(--text-muted);
+}
+
+.tiptap ul[data-type="taskList"] li > div {
+  @apply flex-1;
+}
+
+/* Notion 스타일 슬래시 명령어 메뉴 */
+.suggestion-list {
+  @apply z-50 min-w-[300px] max-h-[320px] overflow-y-auto bg-(--background) border border-(--border-color) rounded-lg shadow-xl p-1.5;
+  position: fixed !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.suggestion-item {
+  @apply w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-left transition-all duration-150 cursor-pointer;
+}
+
+.suggestion-item:hover {
+  @apply bg-(--sidebar-hover);
+}
+
+.suggestion-item.is-selected {
+  @apply bg-(--accent-color) text-white;
+}
+
+.suggestion-item.is-selected .suggestion-item-description {
+  @apply text-white/90;
+}
+
+.suggestion-item:not(.is-selected) .suggestion-item-description {
+  @apply text-(--text-muted);
+}
+
+/* Notion 스타일 블록 호버 효과 */
+.tiptap > * {
+  @apply relative;
+}
+
+.tiptap > *:hover::before {
+  content: "";
+  @apply absolute -left-6 top-0 bottom-0 w-1 bg-transparent;
+}
+
+/* Notion 스타일 포커스 효과 */
+.tiptap:focus {
+  @apply outline-none;
+}
+
+.tiptap p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-(--text-muted) pointer-events-none;
+  float: left;
+  height: 0;
+  clear: both;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+/* Placeholder 스타일 */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+  float: left;
+  height: 0;
+  clear: both;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+/* 애니메이션 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(0.5rem);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-in {
+  animation: fade-in 0.3s ease-out, slide-in-from-right 0.3s ease-out;
+}
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Details/Summary 스타일 */
+details[open] summary span:first-child {
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
+details summary span:first-child {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* TipTap 에디터 모던 스타일 */
+.tiptap {
+  @apply text-slate-800;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #1e293b;
+}
+
+.tiptap p {
+  @apply mb-4 leading-relaxed;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-slate-400 pointer-events-none;
+  float: left;
+  height: 0;
+  clear: both;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+}
+
+.tiptap h1 {
+  @apply text-4xl font-bold text-slate-900 mt-8 mb-4;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.tiptap h2 {
+  @apply text-3xl font-semibold text-slate-900 mt-8 mb-3;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.tiptap h3 {
+  @apply text-2xl font-semibold text-slate-900 mt-6 mb-2;
+  line-height: 1.4;
+}
+
+.tiptap ul,
+.tiptap ol {
+  @apply my-4 pl-8;
+}
+
+.tiptap ul {
+  @apply list-disc;
+}
+
+.tiptap ol {
+  @apply list-decimal;
+}
+
+.tiptap li {
+  @apply my-2;
+  line-height: 1.8;
+}
+
+.tiptap blockquote {
+  @apply border-l-4 border-slate-300 my-6 py-2 pl-6 italic text-slate-600;
+  font-size: 15px;
+}
+
+.tiptap blockquote p {
+  @apply m-0;
+}
+
+.tiptap table {
+  @apply border-collapse border border-slate-300 my-4 w-full;
+}
+
+.tiptap table td,
+.tiptap table th {
+  @apply border border-slate-300 px-4 py-2;
+}
+
+.tiptap table th {
+  @apply bg-slate-100 font-semibold;
+}
+
+.tiptap img {
+  @apply max-w-full h-auto rounded-lg my-4;
+}
+
+.tiptap a {
+  @apply text-blue-600 underline cursor-pointer hover:text-blue-800;
 }

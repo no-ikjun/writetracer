@@ -2,7 +2,6 @@
 
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
@@ -104,9 +103,6 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
       }),
-      Placeholder.configure({
-        placeholder: "여기에 글을 작성하세요...",
-      }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
         defaultAlignment: "left",
@@ -163,29 +159,6 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
           // selection 느낌 조금 더 모던하게 (선택은 tailwind 기본)
           "selection:bg-blue-500/15"
         ),
-      },
-      handleDOMEvents: {
-        keydown: (view, event) => {
-          // 한글 입력 중 Enter 키를 누를 때 composition이 활성화되어 있으면
-          // composition을 먼저 완료하도록 함
-          if (event.key === "Enter" && (event as KeyboardEvent).isComposing) {
-            // composition이 완료될 때까지 기다림
-            return false;
-          }
-          return false;
-        },
-        compositionstart: () => {
-          // 한글 입력 시작
-          return false;
-        },
-        compositionupdate: () => {
-          // 한글 입력 중
-          return false;
-        },
-        compositionend: () => {
-          // 한글 입력 완료
-          return false;
-        },
       },
     },
   });

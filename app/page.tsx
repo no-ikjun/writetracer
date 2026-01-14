@@ -65,9 +65,6 @@ export default function Home() {
         <div className="mx-auto max-w-[1720px] px-6 lg:px-10 h-16 flex items-center gap-4">
           {/* Brand */}
           <div className="shrink-0 flex items-center gap-2">
-            <div className="h-8 w-8 rounded-xl bg-black/4 ring-1 ring-black/6 flex items-center justify-center">
-              <div className="h-3 w-3 rounded-full bg-blue-500/70" />
-            </div>
             <span className="text-[15px] font-semibold tracking-tight">
               Writetracer
             </span>

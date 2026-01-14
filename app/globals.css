@@ -217,26 +217,25 @@
   @apply outline-none;
 }
 
+/* Placeholder 스타일 - float 제거하여 hover 시 레이아웃 깨짐 방지 */
+.ProseMirror p.is-editor-empty:first-child::before,
+.tiptap p.is-editor-empty:first-child::before,
 .tiptap p.is-empty:first-child::before {
   content: attr(data-placeholder);
-  @apply text-(--text-muted) pointer-events-none;
-  float: left;
-  height: 0;
-  clear: both;
+  float: none !important;
+  display: block;
+  height: auto !important;
+  pointer-events: none;
+  color: rgba(100, 116, 139, 0.7);
+  white-space: pre-wrap;
+  word-break: keep-all;
   writing-mode: horizontal-tb !important;
   text-orientation: mixed !important;
 }
 
-/* Placeholder 스타일 */
-.tiptap p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: var(--text-muted);
-  pointer-events: none;
-  float: left;
-  height: 0;
-  clear: both;
-  writing-mode: horizontal-tb !important;
-  text-orientation: mixed !important;
+.ProseMirror p.is-editor-empty:first-child,
+.tiptap p.is-editor-empty:first-child {
+  min-height: 1.5em;
 }
 
 /* 애니메이션 */
@@ -312,16 +311,6 @@ details summary span:first-child {
   @apply mb-4 leading-relaxed;
   font-size: 16px;
   line-height: 1.8;
-}
-
-.tiptap p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  @apply text-slate-400 pointer-events-none;
-  float: left;
-  height: 0;
-  clear: both;
-  writing-mode: horizontal-tb !important;
-  text-orientation: mixed !important;
 }
 
 .tiptap h1 {

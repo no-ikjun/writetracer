@@ -204,6 +204,9 @@ function Divider() {
 
 export default function DocEditor({ onContentChange }: DocEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isComposingRef = useRef(false);
+  const pendingEnterRef = useRef(false);
+  const suppressNextEnterRef = useRef(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -337,6 +340,55 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
       },
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const editorElement = editor.view.dom as HTMLElement;
+
+    const handleCompositionStart = () => {
+      isComposingRef.current = true;
+    };
+
+    const handleCompositionEnd = () => {
+      isComposingRef.current = false;
+      if (pendingEnterRef.current) {
+        pendingEnterRef.current = false;
+        suppressNextEnterRef.current = true;
+        // 조합 완료를 DOM에 확실히 반영한 뒤 줄바꿈
+        editorElement.blur();
+        editorElement.focus();
+        setTimeout(() => {
+          editor.commands.enter();
+        }, 0);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      if (suppressNextEnterRef.current) {
+        suppressNextEnterRef.current = false;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (e.isComposing || isComposingRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        pendingEnterRef.current = true;
+      }
+    };
+
+    editorElement.addEventListener("compositionstart", handleCompositionStart);
+    editorElement.addEventListener("compositionend", handleCompositionEnd);
+    editorElement.addEventListener("keydown", handleKeyDown, { capture: true });
+
+    return () => {
+      editorElement.removeEventListener("compositionstart", handleCompositionStart);
+      editorElement.removeEventListener("compositionend", handleCompositionEnd);
+      editorElement.removeEventListener("keydown", handleKeyDown, { capture: true });
+    };
+  }, [editor]);
 
   useEffect(() => {
     if (!editor || !onContentChange) return;

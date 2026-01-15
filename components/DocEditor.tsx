@@ -2,6 +2,7 @@
 
 import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Node, mergeAttributes } from "@tiptap/core";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
@@ -18,7 +19,9 @@ import TableCell from "@tiptap/extension-table-cell";
 import Color from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import YouTube from "@tiptap/extension-youtube";
-import { useEffect } from "react";
+import CodeBlock from "@tiptap/extension-code-block";
+import { FileHandler } from "@tiptap/extension-file-handler";
+import { useEffect, useRef } from "react";
 
 import {
   Bold,
@@ -40,7 +43,9 @@ import {
   Highlighter,
   Quote,
   Minus,
-  Youtube,
+  SquarePlay,
+  Code,
+  FileText,
 } from "lucide-react";
 
 interface DocEditorProps {
@@ -50,6 +55,107 @@ interface DocEditorProps {
 function cx(...classes: Array<string | false | undefined | null>) {
   return classes.filter(Boolean).join(" ");
 }
+
+function formatBytes(bytes: number) {
+  if (!bytes || Number.isNaN(bytes)) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  const exponent = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(1024)),
+    units.length - 1
+  );
+  const value = bytes / Math.pow(1024, exponent);
+  return `${value.toFixed(value >= 10 || exponent === 0 ? 0 : 1)} ${
+    units[exponent]
+  }`;
+}
+
+const Attachment = Node.create({
+  name: "attachment",
+  group: "block",
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      name: { default: "" },
+      size: { default: 0 },
+      type: { default: "" },
+    };
+  },
+  parseHTML() {
+    return [{ tag: "div[data-attachment]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    const sizeText = formatBytes(Number(HTMLAttributes.size));
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        "data-attachment": "true",
+        class: "attachment-card",
+      }),
+      [
+        "div",
+        { class: "attachment-card__icon", "aria-hidden": "true" },
+        [
+          "svg",
+          {
+            xmlns: "http://www.w3.org/2000/svg",
+            width: "18",
+            height: "18",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": "2",
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "aria-hidden": "true",
+          },
+          [
+            "path",
+            { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" },
+          ],
+          ["path", { d: "M14 2v6h6" }],
+        ],
+      ],
+      [
+        "div",
+        { class: "attachment-card__meta" },
+        [
+          "div",
+          { class: "attachment-card__name" },
+          HTMLAttributes.name || "파일",
+        ],
+        ["div", { class: "attachment-card__size" }, sizeText],
+      ],
+      [
+        "button",
+        {
+          type: "button",
+          class: "attachment-card__download",
+          "aria-label": "다운로드 (준비 중)",
+        },
+        [
+          "svg",
+          {
+            xmlns: "http://www.w3.org/2000/svg",
+            width: "18",
+            height: "18",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            "stroke-width": "2",
+            "stroke-linecap": "round",
+            "stroke-linejoin": "round",
+            "aria-hidden": "true",
+          },
+          ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }],
+          ["path", { d: "M7 10l5 5 5-5" }],
+          ["path", { d: "M12 15V3" }],
+        ],
+      ],
+    ];
+  },
+});
 
 function ToolbarButton({
   active,
@@ -97,11 +203,14 @@ function Divider() {
 }
 
 export default function DocEditor({ onContentChange }: DocEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        codeBlock: false, // 우리가 직접 추가할 CodeBlock 사용
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -146,6 +255,72 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
           class: "rounded-xl my-6 ring-1 ring-black/10 overflow-hidden",
         },
       }),
+      CodeBlock.configure({
+        HTMLAttributes: {
+          class: "rounded-lg my-4",
+        },
+      }),
+      Attachment,
+      FileHandler.configure({
+        onDrop: (currentEditor, files) => {
+          files.forEach((file) => {
+            if (file.type.startsWith("image/")) {
+              const fileReader = new FileReader();
+              fileReader.readAsDataURL(file);
+              fileReader.onload = () => {
+                currentEditor
+                  .chain()
+                  .focus()
+                  .setImage({ src: fileReader.result as string })
+                  .run();
+              };
+              return;
+            }
+
+            currentEditor
+              .chain()
+              .focus()
+              .insertContent({
+                type: "attachment",
+                attrs: {
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                },
+              })
+              .run();
+          });
+        },
+        onPaste: (currentEditor, files) => {
+          files.forEach((file) => {
+            if (file.type.startsWith("image/")) {
+              const fileReader = new FileReader();
+              fileReader.readAsDataURL(file);
+              fileReader.onload = () => {
+                currentEditor
+                  .chain()
+                  .focus()
+                  .setImage({ src: fileReader.result as string })
+                  .run();
+              };
+              return;
+            }
+
+            currentEditor
+              .chain()
+              .focus()
+              .insertContent({
+                type: "attachment",
+                attrs: {
+                  name: file.name,
+                  size: file.size,
+                  type: file.type,
+                },
+              })
+              .run();
+          });
+        },
+      }),
     ],
     content: "",
     editorProps: {
@@ -176,10 +351,58 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
     };
   }, [editor, onContentChange]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !editor) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.type.startsWith("image/")) {
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: fileReader.result as string })
+            .run();
+        };
+        return;
+      }
+
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "attachment",
+          attrs: {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          },
+        })
+        .run();
+    });
+
+    // input 초기화 (같은 파일을 다시 선택할 수 있도록)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (!editor) return null;
 
   return (
     <div className="w-full">
+      {/* 숨겨진 파일 input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="*/*"
+        multiple
+        className="hidden"
+        onChange={handleFileSelect}
+      />
+
       {/* Toolbar wrapper (glass / sticky) */}
       <div className="sticky top-0 z-30">
         <div
@@ -338,6 +561,15 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
               </ToolbarButton>
 
               <ToolbarButton
+                title="파일 첨부"
+                onClick={() => {
+                  fileInputRef.current?.click();
+                }}
+              >
+                <FileText className="h-4 w-4" />
+              </ToolbarButton>
+
+              <ToolbarButton
                 title="YouTube 동영상"
                 onClick={() => {
                   const url = window.prompt("YouTube URL을 입력하세요:");
@@ -345,7 +577,7 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
                     editor.chain().focus().setYoutubeVideo({ src: url }).run();
                 }}
               >
-                <Youtube className="h-4 w-4" />
+                <SquarePlay className="h-4 w-4" />
               </ToolbarButton>
 
               <ToolbarButton
@@ -393,6 +625,14 @@ export default function DocEditor({ onContentChange }: DocEditorProps) {
                 onClick={() => editor.chain().focus().setHorizontalRule().run()}
               >
                 <Minus className="h-4 w-4" />
+              </ToolbarButton>
+
+              <ToolbarButton
+                title="코드 블록"
+                active={editor.isActive("codeBlock")}
+                onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              >
+                <Code className="h-4 w-4" />
               </ToolbarButton>
             </ToolbarGroup>
           </div>

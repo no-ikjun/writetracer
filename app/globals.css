@@ -113,11 +113,60 @@
   @apply m-0;
 }
 
+.tiptap .attachment-card {
+  @apply my-4 flex items-center gap-3 rounded-xl border border-(--border-color) bg-(--background) px-4 py-3 shadow-sm;
+}
+
+.tiptap .attachment-card__icon {
+  @apply flex h-9 w-9 items-center justify-center rounded-lg bg-black/5 text-[13px] text-(--foreground);
+}
+
+.tiptap .attachment-card__meta {
+  @apply min-w-0;
+}
+
+.tiptap .attachment-card__name {
+  @apply text-[14px] font-semibold text-(--foreground) truncate;
+}
+
+.tiptap .attachment-card__size {
+  @apply text-[12px] text-(--text-muted);
+}
+
+.tiptap .attachment-card__download {
+  @apply ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--border-color) bg-white/70 text-(--foreground) transition;
+}
+
+.tiptap .attachment-card__icon svg,
+.tiptap .attachment-card__download svg {
+  @apply block;
+}
+
+.tiptap .attachment-card__download:hover {
+  @apply bg-black/5;
+}
+
+.tiptap .attachment-card__download:active {
+  @apply bg-black/10;
+}
+
 .tiptap pre {
   @apply bg-(--code-bg) rounded-md p-4 my-4 overflow-x-auto font-mono text-sm leading-relaxed;
 }
 
 .tiptap pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+.tiptap pre[data-language] {
+  @apply bg-(--code-bg) rounded-md p-4 my-4 overflow-x-auto font-mono text-sm leading-relaxed;
+}
+
+.tiptap code {
+  @apply font-mono text-sm bg-red-50 text-red-500 px-1.5 py-0.5 rounded;
+}
+
+.tiptap code[data-type="codeBlock"] {
   @apply bg-transparent text-inherit p-0;
 }
 
@@ -154,15 +203,15 @@
 }
 
 .tiptap ul[data-type="taskList"] li {
-  @apply flex items-start gap-2 my-1;
+  @apply flex items-center gap-2 my-1;
 }
 
 .tiptap ul[data-type="taskList"] li > label {
-  @apply flex items-center cursor-pointer mt-0.5;
+  @apply flex items-center cursor-pointer mt-0;
 }
 
 .tiptap ul[data-type="taskList"] li > label input[type="checkbox"] {
-  @apply w-4 h-4 cursor-pointer accent-(--accent-color);
+  @apply w-4 h-4 cursor-pointer accent-(--accent-color) mt-0 translate-y-[1px];
 }
 
 .tiptap ul[data-type="taskList"] li[data-checked="true"] > div {
